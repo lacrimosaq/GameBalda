@@ -87,6 +87,7 @@ void Game::play1(char (*table)[5]) {
             table[x][y] = letter;
         }
         show_table(table);
+        cout << endl;
     }
 }
 
