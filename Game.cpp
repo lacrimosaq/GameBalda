@@ -95,10 +95,10 @@ void Game::play1(char (*table)[5]) {
 
 void Game::play2(char (*table)[5]) {
     show_table(table);
-    bool result = true;
+    bool skipper = true;
     int x, y;
     char letter;
-    while (result) {
+    while (unusedPlaces != 0 && skipper) {
         for (int i = 0; i < 2; i++) {
             cout << "\nFirst player\n";
             cout << "Enter coords where do you want to add a letter (x;y): ";
