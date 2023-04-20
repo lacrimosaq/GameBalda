@@ -20,7 +20,6 @@ void Game::word(char (*table)[5]) {
     vector<string> words;
     ifstream file("C:\\input.txt");
     while (!file.eof()) {
-        string word;
         file >> word;
         words.push_back(word);
     }
@@ -39,7 +38,6 @@ void Game::show_table(char (*table)[5]) {
     cout.width(25);
     cout << "-\n\n";
     cout << "o      ";
-    unusedPlaces--;
     for (int i = 0; i < 5; i++) {
         if (i != 4)
             cout << 'Y' << i << '\t';
@@ -74,6 +72,66 @@ void Game::show_table(char (*table)[5]) {
     }
 }
 
+int Game::getPointsUser() const {
+    return pointsUser;
+}
+
+int Game::getPointsComp() const {
+    return pointsComp;
+}
+
+
+void Game::user1Turn() {
+    int x, y;
+    char letter;
+    for (int i = 0; i < 2; i++) {
+        cout << "\nFirst player\n";
+        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cin >> x >> y;
+        if (x != 5 && y != 5) {
+            unusedPlaces--;
+            cout << "Enter a letter: ";
+            cin >> letter;
+            table[x][y] = letter;
+        } else {
+            skipper1 = false;
+            i++;
+            cout << "First player skipped the turn\n";
+        }
+    }
+}
+
+void Game::user2Turn() {
+    int x, y;
+    char letter;
+    for (int i = 0; i < 2; i++) {
+        cout << "\nSecond player\n";
+        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cin >> x >> y;
+        if (x != 5 && y != 5) {
+            unusedPlaces--;
+            cout << "Enter a letter: ";
+            cin >> letter;
+            table[x][y] = letter;
+        } else {
+            skipper2 = false;
+            i++;
+            cout << "Second player skipped the turn\n";
+        }
+    }
+}
+
+void Game::gameOver(){
+    if (getPointsUser() > getPointsComp())
+        cout << "You won !!!" << endl;
+    else if (getPointsComp() == getPointsUser())
+        cout << "\nDry" << endl;
+    else
+        cout << "You lost !!!" << endl;
+    cout << "You reached - " << getPointsUser() << endl;
+    cout << "Comp reached - " << getPointsComp() << endl;
+}
+
 void Game::play1(char (*table)[5]) {
     show_table(table);
     bool skipper = true;
@@ -95,29 +153,13 @@ void Game::play1(char (*table)[5]) {
 
 void Game::play2(char (*table)[5]) {
     show_table(table);
-    bool skipper = true;
-    int x, y;
-    char letter;
-    while (unusedPlaces != 0 && skipper) {
-        for (int i = 0; i < 2; i++) {
-            cout << "\nFirst player\n";
-            cout << "Enter coords where do you want to add a letter (x;y): ";
-            cin >> x >> y;
-            cout << "Enter a letter: ";
-            cin >> letter;
-            table[x][y] = letter;
-        }
+    while (unusedPlaces != 0 && (skipper1 || skipper2)) {
+        user1Turn();
         show_table(table);
-        for (int i = 0; i < 2; i++) {
-            cout << "\nSecond player\n";
-            cout << "Enter coords where do you want to add a letter (x;y): ";
-            cin >> x >> y;
-            cout << "Enter a letter: ";
-            cin >> letter;
-            table[x][y] = letter;
-        }
+        user2Turn();
         show_table(table);
     }
+    gameOver();
 }
 
 void Game::menu(char (*table)[5]) {
@@ -145,4 +187,9 @@ void Game::menu(char (*table)[5]) {
             cin >> switcher;
             break;
     }
+}
+
+int main(){
+    Game gamer;
+    return 0;
 }
