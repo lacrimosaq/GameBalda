@@ -1,10 +1,10 @@
 //
 // Created by ADMIN on 18.04.2023.
 //
+#include <string>
 
 #ifndef GAMEBALDA_GAME_H
 #define GAMEBALDA_GAME_H
-using namespace std;
 
 class Game {
 private:
@@ -25,14 +25,15 @@ public:
 public:
 
     Game();
-    void word(char (*table)[5]); //take random word from files with words
-    void show_table(char (*table)[5]); //display table into console
+    void word(); //take random word from files with words
+    void show_table(); //display table into console
+    bool checker(std::string find_word , int x, int y);
     void user1Turn (); //turns of users
     void user2Turn (); //turns of users
     void gameOver(); // display the result of game
-    void play1(char (*table)[5]); //console user interface turn
-    void play2(char (*table)[5]); //console user interface turn for 2 users
-    void menu(char (*table)[5]); //console user interface menu
+    void play1(); //console user interface turn
+    void play2(); //console user interface turn for 2 users
+    void menu(); //console user interface menu
 };
 
 
