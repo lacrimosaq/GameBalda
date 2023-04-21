@@ -25,7 +25,7 @@ public:
 public:
 
     Game();
-    void word(); //take random word from files with words
+    void word();  //take random word from files with words
     void show_table(); //display table into console
     bool checker(std::string find_word , int x, int y);
     void user1Turn (); //turns of users
