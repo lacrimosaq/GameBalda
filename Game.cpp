@@ -7,13 +7,16 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <algorithm>
 #include "Game.h"
 
 using namespace std;
 
 Game::Game()
 {
-    menu(table);
+    //menu(table);
+    computer_turn();
+
 }
 void Game::word(char (*table)[5]) {
     string word;
@@ -31,6 +34,7 @@ void Game::word(char (*table)[5]) {
         table[2][i] = word[i];
     }
 }
+
 void Game::show_table(char (*table)[5]) {
     cout.fill('-');
     cout.width(28);
@@ -115,6 +119,155 @@ void Game::play2(char (*table)[5]) {
         }
         show_table(table);
     }
+}
+
+bool Game::helper_checkWord(string word){
+
+    word = " " + word + " ";
+    int offset;
+    string line;
+    ifstream Myfile;
+    Myfile.open ("dictionary.txt");
+
+    if (Myfile.is_open())
+    {
+        while (!Myfile.eof())
+        {
+            getline(Myfile,line);
+            if ((offset = line.find(word, 0)) != string::npos)
+            {
+                cout << "found '" << word << "' in '" << line << "'" << endl;
+                Myfile.close();
+                return true;
+            }
+            else
+            {
+                cout << " not found '" << word << "' in '" << line << "'" << endl;
+            }
+        }
+        Myfile.close();
+    }
+    else
+        cout << "Unable to open this file." << endl;
+
+    return false;
+}
+
+string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){ // x, y - coord last added
+
+    string tmp_word;
+    unavaibleCells.push_back(x*10 + y);
+    //if(horizontal){
+        for(int i = 1; i < 5 - x; i++)
+        {
+            if(count(unavaibleCells.begin(), unavaibleCells.end(), (x+i)*10 + y)){ //check any next turn
+                break;
+            }
+            tmp_word = word + tmp_table[x + i][y];
+            if(helper_checkWord(tmp_word)){
+                return tmp_word;
+            }
+            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x + i, y);
+            if(tmp_word != "-1"){
+                return tmp_word;
+            }
+            break;
+        }
+        for(int i = 1; i <= x; i++)
+        {
+            if(count(unavaibleCells.begin(), unavaibleCells.end(), (x-i)*10 + y)){ //check any next turn
+                break;
+            }
+            tmp_word = word + tmp_table[x - i][y];
+
+            if(helper_checkWord(tmp_word)){
+                return tmp_word;
+            }
+
+            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x - i, y);
+            if(tmp_word != "-1"){
+                return tmp_word;
+            }
+            break;
+        }
+    //}
+    //else{
+        for(int j = 1; j < 5 - y; j++)
+        {
+            if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y + j)){ //check any next turn
+                break;
+            }
+            tmp_word = word + tmp_table[x][y + j];
+
+            if(helper_checkWord(tmp_word)){
+                return tmp_word;
+            }
+
+            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x , y + j);
+            if(tmp_word != "-1"){
+                return tmp_word;
+            }
+            break;
+        }
+        for(int j = 1; j <= y; j++)
+        {
+            if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y - j)){ //check any next turn
+                break;
+            }
+            tmp_word = word + tmp_table[x][y - j];
+
+            if(helper_checkWord(tmp_word)){
+                return tmp_word;
+            }
+
+            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x, y - j);
+            if(tmp_word != "-1"){
+                return tmp_word;
+            }
+            break;
+        }
+
+    //}
+    return "-1";
+
+}
+string Game::computer_turn()
+{
+    string word = "";
+    vector<int> unavaibleCells = {};
+
+    for(int i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 5; j++)
+        {
+            if(tmp_table[i][j] == '\\')
+            {
+               for(int l = 'a'; l <= 'z'; l++){
+                    //tmp_table = table;
+                    tmp_table[i][j] = 'a';
+                    for(int k = 0; k < 5; k++)
+                    {
+                        for (int m = 0; m < 5; m++)
+                        {
+                            if(tmp_table[k][m] != '\\') {
+                                word = "";
+                                word += tmp_table[k][j];
+                                word = tmp_recurse(unavaibleCells, word, i, j);
+                                cout << "Answer: " + word;
+                                if(word != "-1")
+                                {
+                                    //table = tmp_table
+                                    return word;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "-1";
+
 }
 
 void Game::menu(char (*table)[5]) {

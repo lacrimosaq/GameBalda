@@ -7,9 +7,6 @@
 
 using namespace std;
 
-class game {
-
-};
 
 int main() {
 
