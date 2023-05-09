@@ -43,6 +43,7 @@ void Game::show_table(char (*table)[5]) {
     cout.width(25);
     cout << "-\n\n";
     cout << "o      ";
+    unusedPlaces--;
     for (int i = 0; i < 5; i++) {
         if (i != 4)
             cout << 'Y' << i << '\t';
@@ -79,18 +80,20 @@ void Game::show_table(char (*table)[5]) {
 
 void Game::play1(char (*table)[5]) {
     show_table(table);
-    bool result = true;
+    bool skipper = true;
     int x, y;
     char letter;
-    while (result) {
+    while (unusedPlaces != 0 && skipper) {
         for (int i = 0; i < 2; i++) {
             cout << "\nEnter coords where do you want to add a letter (x;y): ";
             cin >> x >> y;
             cout << "\nEnter a letter: ";
             cin >> letter;
             table[x][y] = letter;
+            unusedPlaces--;
         }
         show_table(table);
+        cout << endl;
     }
 }
 

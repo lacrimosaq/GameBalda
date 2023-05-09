@@ -1,3 +1,0 @@
-D:/CLionProjects/GameBalda/cmake-build-debug/CMakeFiles/GameBalda.dir
-D:/CLionProjects/GameBalda/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/CLionProjects/GameBalda/cmake-build-debug/CMakeFiles/rebuild_cache.dir
