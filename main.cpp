@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
 
-  Game game1;
+  Game game1();
 
     return 0;
 }
