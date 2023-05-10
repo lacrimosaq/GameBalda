@@ -96,6 +96,7 @@ bool Game::checker(string find_word, int x, int y) {
 bool Game::checker1(string find_word){
     set<string> find_words;
 int nuller = 0;
+int temp = 0;
 int checker = 0;
 bool result = false;
 if(!find_words.count(find_word)){
@@ -127,6 +128,8 @@ for (int i = 0; i < 5; i++) {
                     if (nuller == find_word.size()){i+=5; j+=5;}
                     checker++;
                 }
+                temp = nuller;
+                nuller = 0;
             }
         }
     }
@@ -134,7 +137,7 @@ for (int i = 0; i < 5; i++) {
     cout << "The word has been used before" << endl;
     return false;
 }
-    if (nuller >= find_word.size()) {
+    if (temp >= find_word.size()) {
         result = true;
         find_words.insert(find_word);
     }
@@ -149,7 +152,7 @@ void Game::user1Turn() {
     skipper1 = true;
     for (int i = 0; i < 2; i++) {
         cout << "\nFirst player\n";
-        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cout << "Enter coords where do you want to add a letter (x;y)\n " << "(5;5)" << " to skip a turn : ";
         cin >> x >> y;
         if (x != 5 && y != 5) {
             unusedPlaces--;
@@ -162,12 +165,13 @@ void Game::user1Turn() {
             cout << "First player skipped the turn\n";
         }
         show_table();
-        cout << "Enter what word do you want to write (q - to quit): ";
+        cout << "Enter what word do you want to write\n (q - to quit): ";
         cin >> find_word;
         if (find_word[0] != 'q'){
             if(checker1(find_word)) {
                 pointsUser1++;
-                cout << "You earned 1 point --- "<<" Your points - " << pointsUser1 << endl;
+                cout << "You earned "<<find_word.size() <<" point --- "<<" Your points - " << pointsUser1 << endl;
+
             }
             else {
                 cout << "There are no such word" << endl;
@@ -184,7 +188,7 @@ void Game::user2Turn() {
     skipper2 = true;
     for (int i = 0; i < 2; i++) {
         cout << "\nSecond player\n";
-        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cout << "Enter coords where do you want to add a letter (x;y)\n " << "(5;5)" << " to skip a turn : ";
         cin >> x >> y;
         if (x != 5 && y != 5) {
             unusedPlaces--;
@@ -202,7 +206,7 @@ void Game::user2Turn() {
         if (find_word[0] != 'q'){
             if(checker1(find_word)) {
                 pointsUser2++;
-                cout << "You earned 1 point --- "<<" Your points - " << pointsUser2 << endl;
+                cout << "You earned "<<find_word.size() <<" point --- "<<" Your points - " << pointsUser2 << endl;
             }
             else {
                 cout << "There are no such word" << endl;
