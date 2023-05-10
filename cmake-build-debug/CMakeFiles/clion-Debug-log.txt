@@ -1,4 +1,4 @@
-"Z:\CLion 2022.3.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" -S C:\redit\sdsd -B C:\redit\sdsd\cmake-build-debug
+"Z:\CLion 2022.3.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" -S C:\redit\GameBalda -B C:\redit\GameBalda\cmake-build-debug
 CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
   CMake 3.25 or higher is required.  You are running version 3.24.2
 
