@@ -3,13 +3,10 @@
 
 using namespace std;
 
-class game {
-
-};
 
 int main() {
 
-  Game game1();
-
+    Game game1;
+    cout << "Hi!";
     return 0;
 }

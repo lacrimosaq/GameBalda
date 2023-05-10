@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <algorithm>
 #include <set>
 #include "Game.h"
 
@@ -14,7 +15,8 @@ using namespace std;
 
 Game::Game()
 {
-    menu();
+    //menu();
+    computer_turn();
 }
 void Game::word() {
     string word;
@@ -74,73 +76,53 @@ void Game::show_table() {
 }
 
 
-/*
-bool Game::checker(string find_word, int x, int y) {
-    int nuller = 0;
-    bool result = false;
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
-            if (find_word[nuller] == table[i][j]) {
-                i = 0;
-                j = 0;
-                nuller++;
-            }
-        }
-    }
-
-    if (nuller == find_word.size())
-        result = true;
-    return result;
-}*/
-
 bool Game::checker1(string find_word){
     set<string> find_words;
-int nuller = 0;
-int checker = 0;
-bool result = false;
-if(!find_words.count(find_word)){
-for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 5; j++) {
-            if (find_word[nuller] == table[i][j]) {
-                nuller++;
-                while (checker < find_word.size() + 1) {
-                if (j != 4) {
-                    j++;
-                    if (find_word[nuller] == table[i][j]) nuller++;
-                    else j--;
-                    if (j != 0) {
-                        j--;
-                        if (find_word[nuller] == table[i][j]) nuller++;
-                        else j++;
+    int nuller = 0;
+    int checker = 0;
+    bool result = false;
+    if(!find_words.count(find_word)){
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (find_word[nuller] == table[i][j]) {
+                    nuller++;
+                    while (checker < find_word.size() + 1) {
+                        if (j != 4) {
+                            j++;
+                            if (find_word[nuller] == table[i][j]) nuller++;
+                            else j--;
+                            if (j != 0) {
+                                j--;
+                                if (find_word[nuller] == table[i][j]) nuller++;
+                                else j++;
+                            }
+                            if (i != 4) {
+                                i++;
+                                if (find_word[nuller] == table[i][j]) nuller++;
+                                else i--;
+                            }
+                        }
+                        if (i != 0) {
+                            i--;
+                            if (find_word[nuller] == table[i][j]) nuller++;
+                            else i++;
+                        }
+                        if (nuller == find_word.size()){i+=5; j+=5;}
+                        checker++;
                     }
-                    if (i != 4) {
-                        i++;
-                        if (find_word[nuller] == table[i][j]) nuller++;
-                        else i--;
-                }
-                    }
-                    if (i != 0) {
-                        i--;
-                        if (find_word[nuller] == table[i][j]) nuller++;
-                        else i++;
-                    }
-                    if (nuller == find_word.size()){i+=5; j+=5;}
-                    checker++;
                 }
             }
         }
+    } else {
+        cout << "The word has been used before" << endl;
+        return false;
     }
-} else {
-    cout << "The word has been used before" << endl;
-    return false;
-}
     if (nuller >= find_word.size()) {
         result = true;
         find_words.insert(find_word);
     }
     return result;
 }
-
 
 void Game::user1Turn() {
     int x, y;
@@ -174,6 +156,7 @@ void Game::user1Turn() {
                 cout << "Your points - " << pointsUser1 << endl;
             }
         }
+        show_table();
     }
 }
 
@@ -209,6 +192,7 @@ void Game::user2Turn() {
                 cout << "Your points - " << pointsUser2 << endl;
             }
         }
+        show_table();
     }
 }
 
@@ -256,6 +240,157 @@ void Game::play2() {
     gameOver2();
 }
 
+bool Game::helper_checkWord(string word){
+
+    word = " " + word + " ";
+    int offset;
+    string line;
+    ifstream Myfile;
+    Myfile.open ("dictionary.txt");
+
+    if (Myfile.is_open())
+    {
+        while (!Myfile.eof())
+        {
+            getline(Myfile,line);
+            if ((offset = line.find(word, 0)) != string::npos)
+            {
+                cout << "found '" << word << "' in '" << line << "'" << endl;
+                Myfile.close();
+                return true;
+            }
+            else
+            {
+                cout << " not found '" << word << "' in '" << line << "'" << endl;
+            }
+        }
+        Myfile.close();
+    }
+    else
+        cout << "Unable to open this file." << endl;
+
+    return false;
+}
+
+string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){ // x, y - coord last added
+
+    string tmp_word;
+    unavaibleCells.push_back(x*10 + y);
+    //if(horizontal){
+    for(int i = 1; i < 5 - x; i++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), (x+i)*10 + y)){ //check any next turn
+            break;
+        }
+        tmp_word = word + tmp_table[x + i][y];
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x + i, y);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+    for(int i = 1; i <= x; i++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), (x-i)*10 + y)){ //check any next turn
+            break;
+        }
+        tmp_word = word + tmp_table[x - i][y];
+
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x - i, y);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+    //}
+    //else{
+    for(int j = 1; j < 5 - y; j++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y + j)){ //check any next turn
+            break;
+        }
+        tmp_word = word + tmp_table[x][y + j];
+
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x , y + j);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+    for(int j = 1; j <= y; j++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y - j)){ //check any next turn
+            break;
+        }
+        tmp_word = word + tmp_table[x][y - j];
+
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x, y - j);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+
+    //}
+    return "-1";
+
+}
+string Game::computer_turn()
+{
+    string word = "q";
+    vector<int> unavaibleCells = {};
+
+    //word = tmp_recurse(unavaibleCells, word, 0, 0); //this for test method tmp_recurse
+    //cout << "Answer: " + word; //this for test method tmp_recurse
+
+    for(int i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 5; j++)
+        {
+            if(tmp_table[i][j] == '\\')
+            {
+                for(int l = 'a'; l <= 'z'; l++){
+                    //tmp_table = table;
+                    tmp_table[i][j] = 'a';
+                    for(int k = 0; k < 5; k++)
+                    {
+                        for (int m = 0; m < 5; m++)
+                        {
+                            if(tmp_table[k][m] != '\\') {
+                                word = "";
+                                word += tmp_table[k][j];
+                                word = tmp_recurse(unavaibleCells, word, i, j);
+                                cout << "Answer: " + word;
+                                if(word != "-1")
+                                {
+                                    //table = tmp_table
+                                    return word;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return "-1";
+
+}
 void Game::menu() {
     cout << "\n 1. Play Royal Baldu with computer" << endl;
     cout << " 2. Play Royal Baldu with other user" << endl;
@@ -281,7 +416,3 @@ void Game::menu() {
     }
 }
 
-int main(){
-    Game gamer;
-    return 0;
-}
