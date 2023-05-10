@@ -14,11 +14,9 @@ using namespace std;
 
 Game::Game()
 {
-    //menu(table);
-    computer_turn();
-
+    menu();
 }
-void Game::word(char (*table)[5]) {
+void Game::word() {
     string word;
     vector<string> words;
     ifstream file("C:\\input.txt");
@@ -34,8 +32,7 @@ void Game::word(char (*table)[5]) {
         table[2][i] = word[i];
     }
 }
-
-void Game::show_table(char (*table)[5]) {
+void Game::show_table() {
     cout.fill('-');
     cout.width(28);
     cout << "GAME";
@@ -77,53 +74,113 @@ void Game::show_table(char (*table)[5]) {
         else cout << 'Y' << i << "      o";
     }
 }
-
-void Game::play1(char (*table)[5]) {
-    show_table(table);
-    bool skipper = true;
+void Game::user1Turn() {
     int x, y;
     char letter;
-    while (unusedPlaces != 0 && skipper) {
-        for (int i = 0; i < 2; i++) {
-            cout << "\nEnter coords where do you want to add a letter (x;y): ";
-            cin >> x >> y;
-            cout << "\nEnter a letter: ";
-            cin >> letter;
-            table[x][y] = letter;
+    string find_word;
+    for (int i = 0; i < 2; i++) {
+        cout << "\nFirst player\n";
+        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cin >> x >> y;
+        if (x != 5 && y != 5) {
             unusedPlaces--;
+            cout << "Enter a letter: ";
+            cin >> letter;
+            table[x][y] = letter;
+        } else {
+            skipper1 = false;
+            i++;
+            cout << "First player skipped the turn\n";
         }
-        show_table(table);
-        cout << endl;
+        cout << "Enter what word do you want to write (q - to quit): ";
+        cin >> find_word;
+        if (find_word[0] != 'q'){
+            if(checker(find_word, x, y)) {
+                pointsUser++;
+                cout << "Your points - " << pointsUser << endl;
+            }
+        }
+        show_table();
     }
 }
 
-void Game::play2(char (*table)[5]) {
-    show_table(table);
-    bool result = true;
+void Game::user2Turn() {
     int x, y;
     char letter;
-    while (result) {
-        for (int i = 0; i < 2; i++) {
-            cout << "\nFirst player\n";
-            cout << "Enter coords where do you want to add a letter (x;y): ";
-            cin >> x >> y;
+    string find_word;
+    for (int i = 0; i < 2; i++) {
+        cout << "\nSecond player\n";
+        cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
+        cin >> x >> y;
+        if (x != 5 && y != 5) {
+            unusedPlaces--;
             cout << "Enter a letter: ";
             cin >> letter;
             table[x][y] = letter;
+        } else {
+            skipper2 = false;
+            i++;
+            cout << "Second player skipped the turn\n";
         }
-        show_table(table);
-        for (int i = 0; i < 2; i++) {
-            cout << "\nSecond player\n";
-            cout << "Enter coords where do you want to add a letter (x;y): ";
-            cin >> x >> y;
-            cout << "Enter a letter: ";
-            cin >> letter;
-            table[x][y] = letter;
+        cout << "Enter what word do you want to write (q - to quit): ";
+        cin >> find_word;
+        if (find_word[0] != 'q'){
+            if(checker(find_word, x, y)) {
+                pointsUser++;
+                cout << "Your points - " << pointsUser << endl;
+            }
         }
-        show_table(table);
+        show_table();
     }
 }
 
+void Game::gameOver(){
+    if (getPointsUser() > getPointsComp())
+        cout << "You won !!!" << endl;
+    else if (getPointsComp() == getPointsUser())
+        cout << "\nDry" << endl;
+    else
+        cout << "You lost !!!" << endl;
+    cout << "You reached - " << getPointsUser() << " --- ";
+    cout << "Comp reached - " << getPointsComp() << endl;
+}
+void Game::play1() {
+    word();
+    show_table();
+    while (unusedPlaces != 0 && (skipper1 || skipper2)) {
+        user1Turn();
+        show_table();
+        user2Turn();
+        show_table();
+    }
+    gameOver();
+}
+
+void Game::play2() {
+    word();
+    show_table();
+    while (unusedPlaces != 0 && (skipper1 || skipper2)) {
+        user1Turn();
+        user2Turn();
+    }
+    gameOver();
+}
+bool Game::checker(string find_word, int x, int y){
+    int nuller = 0;
+    bool result = false;
+    for (int i = 0; i < 5; i++){
+        for (int j = 0; j < 5; j++){
+            if(find_word[nuller] == table[i][j]){
+                i = 0;
+                j = 0;
+                nuller++;
+            }
+        }
+    }
+    if (nuller == find_word.size())
+        result = true;
+    return result;
+}
 bool Game::helper_checkWord(string word){
 
     word = " " + word + " ";
@@ -161,74 +218,74 @@ string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){
     string tmp_word;
     unavaibleCells.push_back(x*10 + y);
     //if(horizontal){
-        for(int i = 1; i < 5 - x; i++)
-        {
-            if(count(unavaibleCells.begin(), unavaibleCells.end(), (x+i)*10 + y)){ //check any next turn
-                break;
-            }
-            tmp_word = word + tmp_table[x + i][y];
-            if(helper_checkWord(tmp_word)){
-                return tmp_word;
-            }
-            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x + i, y);
-            if(tmp_word != "-1"){
-                return tmp_word;
-            }
+    for(int i = 1; i < 5 - x; i++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), (x+i)*10 + y)){ //check any next turn
             break;
         }
-        for(int i = 1; i <= x; i++)
-        {
-            if(count(unavaibleCells.begin(), unavaibleCells.end(), (x-i)*10 + y)){ //check any next turn
-                break;
-            }
-            tmp_word = word + tmp_table[x - i][y];
-
-            if(helper_checkWord(tmp_word)){
-                return tmp_word;
-            }
-
-            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x - i, y);
-            if(tmp_word != "-1"){
-                return tmp_word;
-            }
+        tmp_word = word + tmp_table[x + i][y];
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x + i, y);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+    for(int i = 1; i <= x; i++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), (x-i)*10 + y)){ //check any next turn
             break;
         }
+        tmp_word = word + tmp_table[x - i][y];
+
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x - i, y);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
     //}
     //else{
-        for(int j = 1; j < 5 - y; j++)
-        {
-            if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y + j)){ //check any next turn
-                break;
-            }
-            tmp_word = word + tmp_table[x][y + j];
-
-            if(helper_checkWord(tmp_word)){
-                return tmp_word;
-            }
-
-            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x , y + j);
-            if(tmp_word != "-1"){
-                return tmp_word;
-            }
+    for(int j = 1; j < 5 - y; j++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y + j)){ //check any next turn
             break;
         }
-        for(int j = 1; j <= y; j++)
-        {
-            if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y - j)){ //check any next turn
-                break;
-            }
-            tmp_word = word + tmp_table[x][y - j];
+        tmp_word = word + tmp_table[x][y + j];
 
-            if(helper_checkWord(tmp_word)){
-                return tmp_word;
-            }
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
 
-            tmp_word = tmp_recurse(unavaibleCells, tmp_word, x, y - j);
-            if(tmp_word != "-1"){
-                return tmp_word;
-            }
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x , y + j);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
+    for(int j = 1; j <= y; j++)
+    {
+        if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y - j)){ //check any next turn
             break;
         }
+        tmp_word = word + tmp_table[x][y - j];
+
+        if(helper_checkWord(tmp_word)){
+            return tmp_word;
+        }
+
+        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x, y - j);
+        if(tmp_word != "-1"){
+            return tmp_word;
+        }
+        break;
+    }
 
     //}
     return "-1";
@@ -245,7 +302,7 @@ string Game::computer_turn()
         {
             if(tmp_table[i][j] == '\\')
             {
-               for(int l = 'a'; l <= 'z'; l++){
+                for(int l = 'a'; l <= 'z'; l++){
                     //tmp_table = table;
                     tmp_table[i][j] = 'a';
                     for(int k = 0; k < 5; k++)
@@ -272,8 +329,7 @@ string Game::computer_turn()
     return "-1";
 
 }
-
-void Game::menu(char (*table)[5]) {
+void Game::menu() {
     cout << "\n 1. Play Royal Baldu with computer" << endl;
     cout << " 2. Play Royal Baldu with other user" << endl;
     cout << " 3. Exit\n" << endl;
@@ -282,12 +338,10 @@ void Game::menu(char (*table)[5]) {
     cin >> switcher;
     switch (switcher) {
         case 1:
-            word(table);
-            play1(table);
+            play1();
             break;
         case 2:
-            word(table);
-            play2(table);
+            play2();
             break;
         case 3:
             cout << "Goodbye -___-" << endl;
