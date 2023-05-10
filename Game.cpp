@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <set>
 #include "Game.h"
 
 using namespace std;
@@ -72,34 +73,80 @@ void Game::show_table() {
     }
 }
 
-int Game::getPointsUser() const {
-    return pointsUser;
-}
 
-int Game::getPointsComp() const {
-    return pointsComp;
-}
-bool Game::checker(string find_word, int x, int y){
+/*
+bool Game::checker(string find_word, int x, int y) {
     int nuller = 0;
     bool result = false;
-    for (int i = 0; i < 5; i++){
-        for (int j = 0; j < 5; j++){
-            if(find_word[nuller] == table[i][j]){
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (find_word[nuller] == table[i][j]) {
                 i = 0;
                 j = 0;
                 nuller++;
             }
         }
     }
+
     if (nuller == find_word.size())
         result = true;
     return result;
+}*/
+
+bool Game::checker1(string find_word){
+    set<string> find_words;
+int nuller = 0;
+int checker = 0;
+bool result = false;
+if(!find_words.count(find_word)){
+for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 5; j++) {
+            if (find_word[nuller] == table[i][j]) {
+                nuller++;
+                while (checker < find_word.size() + 1) {
+                if (j != 4) {
+                    j++;
+                    if (find_word[nuller] == table[i][j]) nuller++;
+                    else j--;
+                    if (j != 0) {
+                        j--;
+                        if (find_word[nuller] == table[i][j]) nuller++;
+                        else j++;
+                    }
+                    if (i != 4) {
+                        i++;
+                        if (find_word[nuller] == table[i][j]) nuller++;
+                        else i--;
+                }
+                    }
+                    if (i != 0) {
+                        i--;
+                        if (find_word[nuller] == table[i][j]) nuller++;
+                        else i++;
+                    }
+                    if (nuller == find_word.size()){i+=5; j+=5;}
+                    checker++;
+                }
+            }
+        }
+    }
+} else {
+    cout << "The word has been used before" << endl;
+    return false;
 }
+    if (nuller >= find_word.size()) {
+        result = true;
+        find_words.insert(find_word);
+    }
+    return result;
+}
+
 
 void Game::user1Turn() {
     int x, y;
     char letter;
     string find_word;
+    skipper1 = true;
     for (int i = 0; i < 2; i++) {
         cout << "\nFirst player\n";
         cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
@@ -114,15 +161,19 @@ void Game::user1Turn() {
             i++;
             cout << "First player skipped the turn\n";
         }
+        show_table();
         cout << "Enter what word do you want to write (q - to quit): ";
         cin >> find_word;
         if (find_word[0] != 'q'){
-            if(checker(find_word, x, y)) {
-                pointsUser++;
-                cout << "Your points - " << pointsUser << endl;
+            if(checker1(find_word)) {
+                pointsUser1++;
+                cout << "You earned 1 point --- "<<" Your points - " << pointsUser1 << endl;
+            }
+            else {
+                cout << "There are no such word" << endl;
+                cout << "Your points - " << pointsUser1 << endl;
             }
         }
-        show_table();
     }
 }
 
@@ -130,6 +181,7 @@ void Game::user2Turn() {
     int x, y;
     char letter;
     string find_word;
+    skipper2 = true;
     for (int i = 0; i < 2; i++) {
         cout << "\nSecond player\n";
         cout << "Enter coords where do you want to add a letter (x;y), " << "(5;5)" << " to skip a turn : ";
@@ -144,27 +196,42 @@ void Game::user2Turn() {
             i++;
             cout << "Second player skipped the turn\n";
         }
+        show_table();
         cout << "Enter what word do you want to write (q - to quit): ";
         cin >> find_word;
         if (find_word[0] != 'q'){
-            if(checker(find_word, x, y)) {
-                pointsUser++;
-                cout << "Your points - " << pointsUser << endl;
+            if(checker1(find_word)) {
+                pointsUser2++;
+                cout << "You earned 1 point --- "<<" Your points - " << pointsUser2 << endl;
+            }
+            else {
+                cout << "There are no such word" << endl;
+                cout << "Your points - " << pointsUser2 << endl;
             }
         }
-        show_table();
     }
 }
 
-void Game::gameOver(){
-    if (getPointsUser() > getPointsComp())
+void Game::gameOver1() const{
+    if (pointsUser1 > pointsUser2)
         cout << "You won !!!" << endl;
-    else if (getPointsComp() == getPointsUser())
+    else if (pointsUser1 == pointsUser2)
         cout << "\nDry" << endl;
     else
         cout << "You lost !!!" << endl;
-    cout << "You reached - " << getPointsUser() << " --- ";
-    cout << "Comp reached - " << getPointsComp() << endl;
+    cout << "You reached - " << pointsUser1 << " --- ";
+    cout << "Comp reached - " << pointsUser2 << endl;
+}
+
+void Game::gameOver2() const{
+    if (pointsUser1 > pointsUser2)
+        cout << "First player won !!!" << endl;
+    else if (pointsUser1 == pointsUser2)
+        cout << "\nDry" << endl;
+    else
+        cout << "Second player won !!!" << endl;
+    cout << "First player reached - " << pointsUser1 << " --- ";
+    cout << "Second player reached - " << pointsUser2 << endl;
 }
 
 void Game::play1() {
@@ -176,7 +243,7 @@ void Game::play1() {
         user2Turn();
         show_table();
     }
-    gameOver();
+    gameOver1();
 }
 
 void Game::play2() {
@@ -186,7 +253,7 @@ void Game::play2() {
         user1Turn();
         user2Turn();
     }
-    gameOver();
+    gameOver2();
 }
 
 void Game::menu() {
