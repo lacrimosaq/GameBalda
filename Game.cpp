@@ -15,7 +15,8 @@ using namespace std;
 
 Game::Game()
 {
-    menu();
+    //menu();
+    computer_turn();
 }
 void Game::word() {
     string word;
@@ -351,8 +352,11 @@ string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){
 }
 string Game::computer_turn()
 {
-    string word = "";
+    string word = "q";
     vector<int> unavaibleCells = {};
+
+    //word = tmp_recurse(unavaibleCells, word, 0, 0); //this for test method tmp_recurse
+    //cout << "Answer: " + word; //this for test method tmp_recurse
 
     for(int i = 0; i < 5; i++)
     {

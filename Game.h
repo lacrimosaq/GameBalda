@@ -12,23 +12,24 @@ private:
     int pointsUser1 = 0;
     int pointsUser2 = 0;
     int unusedPlaces = 20;
-    char table[5][5] = {{'\\','\\','\\','\\','\\'},
+    char table[5][5] = {{'\\','\\','\\','\\','\\'}, //our game table
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},};
-    char tmp_table[5][5] = {
+    char tmp_table[5][5] = {    //helper game table for check and using in method
             {'q','w','e','r','t'},
             {'a','s','d','f','g'},
             {'z','x','c','v','b'},
             {'y','u','i','o','p'},
             {'h','j','k','l','m'},};
 
-    string tmp_recurse(vector<int> unavaibleCells, string word, int x, int y); //helper method
+    string tmp_recurse(vector<int> unavaibleCells, string word, int x, int y); //helper method for check any word in table
     bool helper_checkWord(string word); //helper check word in file
     bool skipper1 = true;
     bool skipper2 = true;
 
+public:
     Game();
     void word();  //take random word from files with words
     void show_table(); //display table into console
