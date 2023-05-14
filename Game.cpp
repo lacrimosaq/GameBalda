@@ -32,6 +32,7 @@ void Game::word() {
     for (int i = 0; i < 5; i++) {
         table[2][i] = word[i];
     }
+    find_words.insert(word);
 }
 void Game::show_table() {
     cout.fill('-');
@@ -111,6 +112,7 @@ bool Game::checker(string find_word){
                             j++;
                             if (find_word[nuller] == table[i][j]) nuller++;
                             else j--;
+                        }
                             if (j != 0) {
                                 j--;
                                 if (find_word[nuller] == table[i][j]) nuller++;
@@ -121,7 +123,7 @@ bool Game::checker(string find_word){
                                 if (find_word[nuller] == table[i][j]) nuller++;
                                 else i--;
                             }
-                        }
+
                         if (i != 0) {
                             i--;
                             if (find_word[nuller] == table[i][j]) nuller++;
@@ -154,7 +156,7 @@ void Game::user1Turn() {
         cout << "\n---------------------First player--------------------\n";
         cout << "Enter coords where do you want to add a letter (x;y)\n "
              << "(5;5)" << "-  to skip a turn    : ";
-       set_letter(iter);
+        skipper1 = set_letter(iter);
         show_table();
         cout << "Enter what word do you want to write\n (q - to quit): ";
         cin >> find_word;
@@ -180,7 +182,7 @@ void Game::user2Turn() {
         cout << "\n-------------------Second player-------------------\n";
         cout << "Enter coords where do you want to add a letter (x;y)\n "
              << "(5;5)" << "-  to skip a turn    : ";
-        set_letter(iter);
+        skipper2 = set_letter(iter);
         show_table();
         cout << "Enter what word do you want to write (q - to quit): ";
         cin >> find_word;
@@ -201,21 +203,23 @@ void Game::user2Turn() {
 }
 
 void Game::gameOver1() const{
-    cout << "Point of players: ["<< pointsUser1 <<':'<<pointsUser2 <<"]\n";
+    cout << "\n-----------------Point of players------------------\n"
+              "----------------- ["<< pointsUser1 <<':'<<pointsUser2 <<"]------------------\n";
     if (pointsUser1 > pointsUser2)
-        cout << "---------------You won !!!---------------" << endl;
+        cout << "-----------------You won !!!-----------------" << endl;
     else if (pointsUser1 == pointsUser2)
-        cout << "------------------Dry--------------------" << endl;
+        cout << "--------------------Dry----------------------" << endl;
     else
-        cout << "---------------You lost !!!--------------" << endl;
+        cout << "-----------------You lost !!!----------------" << endl;
 }
 
 void Game::gameOver2() const{
-    cout << "Point of players: ["<< pointsUser1 <<':'<<pointsUser2 <<"]\n";
+    cout << "\n-----------------Point of players------------------\n"
+            "----------------------["<< pointsUser1 <<':'<<pointsUser2 <<"]----------------------\n";
     if (pointsUser1 > pointsUser2)
         cout << "------------First player won !!!-----------" << endl;
     else if (pointsUser1 == pointsUser2)
-        cout << "--------------------Dry--------------------" << endl;
+        cout << "------------------------Dry------------------------" << endl;
     else
         cout << "-------------Second player won !!!---------" << endl;
 }
@@ -242,9 +246,12 @@ void Game::play2() {
     gameOver2();
 }
 
+
+
+
 bool Game::helper_checkWord(string word){
 
-    word = " " + word + " ";
+  //  word = " " + word + " ";
     int offset;
     string line;
     ifstream Myfile;
@@ -257,14 +264,14 @@ bool Game::helper_checkWord(string word){
             getline(Myfile,line);
             if ((offset = line.find(word, 0)) != string::npos)
             {
-                cout << "found '" << word << "' in '" << line << "'" << endl;
+                //cout << "found '" << word << "' in '" << line << "'" << endl;
                 Myfile.close();
                 return true;
             }
-            else
+            /*else
             {
                 cout << " not found '" << word << "' in '" << line << "'" << endl;
-            }
+            }*/
         }
         Myfile.close();
     }
@@ -418,28 +425,28 @@ void Game::menu() {
     }
 }
 
-void Game::set_letter(int i) {
+bool Game::set_letter(int i) {
     int x, y;
     char letter;
     bool check = true;
     while (check) {
         cin >> x >> y;
+        if (x != 5 || y != 5) {
         if (table[x][y] == '\\') {
-            if (x != 5 && y != 5) {
                 unusedPlaces--;
                 cout << "Enter a letter: ";
                 cin >> letter;
                 table[x][y] = letter;
-            } else {
-                skipper1 = false;
-                i++;
-                cout << "First player skipped the turn\n";
-            }
+            } else cout << "You cannot put a letter there\n";
             check = false;
-        } else cout << "You cannot put a letter there\n";
+        }  else {
+            cout << "First player skipped the turn\n";
+            return false;
+        }
 
 
     }
+    return true;
 }
 
 

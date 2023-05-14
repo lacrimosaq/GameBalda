@@ -48,7 +48,7 @@ public:
 
     void set_letter(int x, int y, int i);
 
-    void set_letter(int i);
+    bool set_letter(int i);
 };
 
 
