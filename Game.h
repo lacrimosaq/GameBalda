@@ -1,6 +1,7 @@
 //
 // Created by ADMIN on 18.04.2023.
 //
+#include <string>
 
 #ifndef GAMEBALDA_GAME_H
 #define GAMEBALDA_GAME_H
@@ -12,7 +13,7 @@ private:
     int pointsUser1 = 0;
     int pointsUser2 = 0;
     int unusedPlaces = 20;
-    char table[5][5] = {{'\\','\\','\\','\\','\\'}, //our game table
+    char table[5][5] = {{'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
@@ -30,10 +31,11 @@ private:
     bool skipper2 = true;
 
 public:
+
     Game();
     void word();  //take random word from files with words
     void show_table(); //display table into console
-    // bool checker(std::string find_word , int x, int y); // old checher
+   // bool checker(std::string find_word , int x, int y); // old checher
     bool checker(std::string find_word); // new checker with algoritm
     void user1Turn (); //turns of users
     void user2Turn (); //turns of users
@@ -44,9 +46,6 @@ public:
     string computer_turn(); //turn by computer
     void menu(); //console user interface menu
 
-    void set_letter(int x, int y);
-
-    void set_letter(int x, int y, int i);
 
     bool set_letter(int i);
 };

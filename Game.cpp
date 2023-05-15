@@ -98,10 +98,10 @@ bool Game::checker(string find_word, int x, int y) {
 }*/
 
 bool Game::checker(string find_word){
-    int nuller = 0;
-    int temp = 0;
-    int checker = 0;
-    bool result = false;
+int nuller = 0;
+int temp = 0;
+int checker = 0;
+bool result = false;
     if(!find_words.count(find_word)){
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
@@ -113,16 +113,16 @@ bool Game::checker(string find_word){
                             if (find_word[nuller] == table[i][j]) nuller++;
                             else j--;
                         }
-                            if (j != 0) {
-                                j--;
-                                if (find_word[nuller] == table[i][j]) nuller++;
-                                else j++;
-                            }
-                            if (i != 4) {
-                                i++;
-                                if (find_word[nuller] == table[i][j]) nuller++;
-                                else i--;
-                            }
+                        if (j != 0) {
+                            j--;
+                            if (find_word[nuller] == table[i][j]) nuller++;
+                            else j++;
+                        }
+                        if (i != 4) {
+                            i++;
+                            if (find_word[nuller] == table[i][j]) nuller++;
+                            else i--;
+                        }
 
                         if (i != 0) {
                             i--;
@@ -188,14 +188,14 @@ void Game::user2Turn() {
         cin >> find_word;
         if (find_word[0] != 'q'){
             if (helper_checkWord(find_word)) {
-            if(checker(find_word)) {
-                pointsUser2 +=find_word.size();
-                cout << "You earned "<<find_word.size() <<" point --- "<<" Your points - " << pointsUser2 << endl;
-            }
-            else {
-                cout << "There are no such word" << endl;
-                cout << "Your points - " << pointsUser2 << endl;
-            }
+                if(checker(find_word)) {
+                    pointsUser2 +=find_word.size();
+                    cout << "You earned "<<find_word.size() <<" point --- "<<" Your points - " << pointsUser2 << endl;
+                }
+                else {
+                    cout << "There are no such word" << endl;
+                    cout << "Your points - " << pointsUser2 << endl;
+                }
             } else cout << "There are no such word in dictionary!\n";
 
         }else iter++;
