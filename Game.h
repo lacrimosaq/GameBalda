@@ -1,6 +1,7 @@
 //
 // Created by ADMIN on 18.04.2023.
 //
+#include <string>
 
 #ifndef GAMEBALDA_GAME_H
 #define GAMEBALDA_GAME_H
@@ -12,7 +13,7 @@ private:
     int pointsUser1 = 0;
     int pointsUser2 = 0;
     int unusedPlaces = 20;
-    char table[5][5] = {{'\\','\\','\\','\\','\\'}, //our game table
+    char table[5][5] = {{'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
                         {'\\','\\','\\','\\','\\'},
@@ -23,18 +24,19 @@ private:
             {'z','x','c','v','b'},
             {'y','u','i','o','p'},
             {'h','j','k','l','m'},};
-
+    set<string> find_words;
     string tmp_recurse(vector<int> unavaibleCells, string word, int x, int y); //helper method for check any word in table
     bool helper_checkWord(string word); //helper check word in file
     bool skipper1 = true;
     bool skipper2 = true;
 
 public:
+
     Game();
     void word();  //take random word from files with words
     void show_table(); //display table into console
    // bool checker(std::string find_word , int x, int y); // old checher
-    bool checker1(std::string find_word); // new checker with algoritm
+    bool checker(std::string find_word); // new checker with algoritm
     void user1Turn (); //turns of users
     void user2Turn (); //turns of users
     void gameOver1() const; // display the result of game with computer
@@ -44,6 +46,8 @@ public:
     string computer_turn(); //turn by computer
     void menu(); //console user interface menu
 
+
+    bool set_letter(int i);
 };
 
 
