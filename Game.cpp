@@ -7,8 +7,13 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <thread>
+#include <chrono>
 #include <set>
 #include <algorithm>
+#include <iterator>
+#include <cstdlib>
+#include <windows.h>
 #include "Game.h"
 
 using namespace std;
@@ -16,25 +21,49 @@ using namespace std;
 Game::Game()
 {
     menu();
-    //computer_turn();
 }
-void Game::word() {
-    string word;
-    vector<string> words;
-    ifstream file("cmake-build-debug\\input.txt");
-    while (!file.eof()) {
-        file >> word;
-        words.push_back(word);
+string Game::randomWordFromFile() {
+    int offset;
+    int countOfWords;
+    string line;
+    ifstream Myfile;
+    Myfile.open ("dictionary.txt");
+
+    //get count of words in file
+    if (Myfile.is_open())
+    {
+        while ( getline(Myfile,line))
+        {
+            countOfWords++;
+        }
     }
-    default_random_engine gen{std::random_device()()};
-    uniform_int_distribution<> dist(0, words.size() - 1);
-    word = words[dist(gen)];
-    for (int i = 0; i < 5; i++) {
-        table[2][i] = word[i];
-    }
-    find_words.insert(word);
+    do{
+        int numberOfWord = rand() % countOfWords+1;
+        Myfile.clear();
+        Myfile.seekg(0);
+
+        //get word by random index
+        if (Myfile.is_open())
+        {
+            for(int i = 0; i < numberOfWord; i++)
+            {
+                if(!getline(Myfile,line)){
+                }
+            }
+        }
+        else
+            cout << "Unable to open this file." << endl;
+    } while(line.size() != 5);
+    Myfile.close();
+    return line;
 }
-void Game::show_table() {
+string Game::toLowerCaseString(string str){
+    string strR = "";
+    for (int i=0; i<str.size(); i++)
+        strR += tolower(str.c_str()[i]);
+    return strR;
+}
+void Game::show_table(char table[5][5]) {
     cout.fill('-');
     cout.width(28);
     cout << "GAME";
@@ -78,26 +107,7 @@ cout << endl;
 }
 
 
-/*
-bool Game::checker(string find_word, int x, int y) {
-    int nuller = 0;
-    bool result = false;
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
-            if (find_word[nuller] == table[i][j]) {
-                i = 0;
-                j = 0;
-                nuller++;
-            }
-        }
-    }
-
-    if (nuller == find_word.size())
-        result = true;
-    return result;
-}*/
-
-bool Game::checker(string find_word){
+bool Game::checker(string find_word, char table[5][5]){
 int nuller = 0;
 int temp = 0;
 int checker = 0;
@@ -137,8 +147,9 @@ bool result = false;
                 }
             }
         }
-    } else {
-        cout << "The word has been used before" << endl;
+    }
+    else {
+        //cout << "The word has been used before" << endl;
         return false;
     }
     if (temp >= find_word.size()) {
@@ -149,57 +160,122 @@ bool result = false;
 }
 
 
-void Game::user1Turn() {
-    string find_word;
-    skipper1 = true;
-    for (int iter = 0; iter < 2; iter++) {
-        cout << "\n---------------------First player--------------------\n";
-        cout << "Enter coords where do you want to add a letter (x;y)\n "
-             << "(5;5)" << "-  to skip a turn    : ";
-        skipper1 = set_letter(iter);
-        show_table();
-        cout << "Enter what word do you want to write\n (q - to quit): ";
-        cin >> find_word;
-        if (find_word[0] != 'q') {
-            if (helper_checkWord(find_word)) {
-                if (checker(find_word)) {
-                    pointsUser1 += find_word.size();
-                    cout << "You earned " << find_word.size() << " point --- " << " Your points - " << pointsUser1
-                         << endl;
-                } else {
-                    cout << "There are no such word" << endl;
-                    cout << "Your points - " << pointsUser1 << endl;
-                }
-            } else cout << "There are no such word in dictionary!\n";
-        } else iter++;
-    }
-}
+bool Game::userTurn() {
+    string answer; //user input
+    char letter;
+    int x, y;
+    cout << "Enter coords where do you want to add a letter (x;y)\n";
+    while (true) {
+        while (true) {
+            while (true) {
+                cout << "Enter x \n(q - to quit): ";
+                cin >> answer;
+                answer = toLowerCaseString(answer);
 
-void Game::user2Turn() {
-    string find_word;
-    skipper2 = true;
-    for (int iter = 0; iter < 2; iter++) {
-        cout << "\n-------------------Second player-------------------\n";
-        cout << "Enter coords where do you want to add a letter (x;y)\n "
-             << "(5;5)" << "-  to skip a turn    : ";
-        skipper2 = set_letter(iter);
-        show_table();
-        cout << "Enter what word do you want to write (q - to quit): ";
-        cin >> find_word;
-        if (find_word[0] != 'q'){
-            if (helper_checkWord(find_word)) {
-                if(checker(find_word)) {
-                    pointsUser2 +=find_word.size();
-                    cout << "You earned "<<find_word.size() <<" point --- "<<" Your points - " << pointsUser2 << endl;
+                if (equal(answer.begin(), answer.end(), "q")) return false;
+                else if (!equal(answer.begin(), answer.end(), "0") && atoi(answer.c_str()) == 0)
+                    cout << "Invalid value" << endl;
+                else if (atoi(answer.c_str()) > 4 || atoi(answer.c_str()) < 0)
+                    cout << "Invalid value" << endl;
+                else {
+                    x = atoi(answer.c_str());
+                    break;
+                }
+            }
+            while (true) {
+                cout << "Enter y \n(q - to quit): ";
+                cin >> answer;
+                answer = toLowerCaseString(answer);
+                if (equal(answer.begin(), answer.end(), "q")) return false;
+                else if (!equal(answer.begin(), answer.end(), "0") && atoi(answer.c_str()) == 0)
+                    cout << "Invalid value" << endl;
+                else if (atoi(answer.c_str()) > 4 || atoi(answer.c_str()) < 0)
+                    cout << "Invalid value" << endl;
+                else {
+                    y = atoi(answer.c_str());
+                    break;
+                }
+            }
+            if (!checkGoodPlaceForLetter(x,y)){
+                cout << "This is bad place for new letter! Try again!\n";
+            }
+            else if(tmp_table[x][y] == '\\'){
+                break;
+            }
+            else
+                cout << "You cannot put a letter there! Try again!\n";
+        }
+        while (true) {
+            cout << "Enter a letter\n(q - to quit):  ";
+            cin >> answer;
+            answer = toLowerCaseString(answer);
+            if (equal(answer.begin(), answer.end(), "q")) return false;
+            else if(answer.length() != 1) cout << "Invalid value" << endl;
+            else if(!isalpha(answer.c_str()[0])) cout << "Invalid value" << endl;
+            else {
+                letter = answer.c_str()[0];
+                if(letter >= 'A' && letter <= 'Z') letter += 'a' - 'A';
+                break;
+            }
+        }
+        unusedPlaces--;
+        tmp_table[x][y] = letter;
+
+
+        show_table(tmp_table);
+        while(true){
+            cout << "Enter what word do you want to write\n(q - to quit): ";
+            cin >> answer;
+            answer = toLowerCaseString(answer);
+            if (!equal(answer.begin(), answer.end(), "q")) {
+                if (helper_checkWord(answer)) {
+                    if (checker(answer, tmp_table)) {
+                        cout << "You earned " << answer.size() << endl;
+                        copy(&tmp_table[0][0], &tmp_table[0][0]+5*5, &main_table[0][0]);
+                        return true;
+                    }
+                    else {
+                        cout << "You cannot put this word!" << endl;
+                    }
                 }
                 else {
-                    cout << "There are no such word" << endl;
-                    cout << "Your points - " << pointsUser2 << endl;
+                    cout << "There are no such word in dictionary!\n";
                 }
-            } else cout << "There are no such word in dictionary!\n";
-
-        }else iter++;
+            }
+            else {
+                copy(&main_table[0][0], &main_table[0][0]+5*5, &tmp_table[0][0]);
+                return false;
+            }
+            while(true) {
+                cout << "Do you want try again to put word?\n(yes/no): ";
+                cin >> answer;
+                answer = toLowerCaseString(answer);
+                if (equal(answer.begin(), answer.end(), "yes")) {
+                    break;
+                } else if (equal(answer.begin(), answer.end(), "no")) {
+                    break;
+                } else {
+                    cout << "Invalid value" << endl;
+                }
+            }
+            if (equal(answer.begin(), answer.end(), "no"))
+                break;
+        }
+        while(true) {
+            cout << "Do you want try again to put letter?\n(yes/no): ";
+            cin >> answer;
+            answer = toLowerCaseString(answer);
+            copy(&main_table[0][0], &main_table[0][0]+5*5, &tmp_table[0][0]); //tmp_table = main_table;
+            if (equal(answer.begin(), answer.end(), "yes")) {
+                break;
+            } else if (equal(answer.begin(), answer.end(), "no")) {
+                return false;
+            } else {
+                cout << "Invalid value" << endl;
+            }
+        }
     }
+
 }
 
 void Game::gameOver1() const{
@@ -224,24 +300,87 @@ void Game::gameOver2() const{
         cout << "-------------Second player won !!!---------" << endl;
 }
 
-void Game::play1() {
-    word();
-    show_table();
+void Game::resetVariable() {
+    string startWord = randomWordFromFile();
+    find_words.clear();
+    find_words.insert(startWord);
+    skipper1 = true;
+    skipper2 = true;
+    pointsUser1 = 0;
+    pointsUser2 = 0;
+    unusedPlaces = 20;
+    for(int i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 5; j++){
+            (i == 2) ? main_table[i][j] = startWord[j] : main_table[i][j] = '\\';
+            (i == 2) ? tmp_table[i][j] = startWord[j] : tmp_table[i][j] = '\\';
+        }
+    }
+}
+void Game::waitForComputer()
+{
+
+    while(!helper_threadIsEnd){
+        this_thread::sleep_for(chrono::milliseconds(200));
+        if(helper_threadIsEnd) break;
+        this_thread::sleep_for(chrono::milliseconds(200));
+        if(helper_threadIsEnd) break;
+        this_thread::sleep_for(chrono::milliseconds(200));
+        if(helper_threadIsEnd) break;
+        this_thread::sleep_for(chrono::milliseconds(200));
+        if(helper_threadIsEnd) break;
+        this_thread::sleep_for(chrono::milliseconds(200));
+        if(helper_threadIsEnd) break;
+        cout << "Waiting for computer...\n";
+    }
+}
+void Game::playVersusComputer() {
+    string computer_word;
+    resetVariable();
+    show_table(main_table);
     while (unusedPlaces != 0 && (skipper1 || skipper2)) {
-        user1Turn();
-        show_table();
-        user2Turn();
-        show_table();
+        cout << "\n---------------------First player--------------------\n";
+        skipper1 = userTurn();
+        if(skipper1) pointsUser1 += next(find_words.begin(), find_words.size()-1)->size();
+
+        cout << "First player's points - " << pointsUser1 << endl;
+        cout << "Second player's points - " << pointsUser2 << endl;
+        show_table(main_table);
+
+        cout << "\n-------------------Second player-------------------\n";
+
+        helper_threadIsEnd = false;
+        thread t1(&Game::waitForComputer, this);
+        computer_word = computer_turn();
+        helper_threadIsEnd = true;
+        t1.join();
+
+        skipper2 = equal(computer_word.begin(), computer_word.end(), "-1") ? false : true;
+        equal(computer_word.begin(), computer_word.end(), "-1") ? cout << "Computer skip turn" << endl : cout << "Computer word is - " << computer_word << endl;
+        cout << "First player's points - " << pointsUser1 << endl;
+        cout << "Second player's points - " << pointsUser2 << endl;
+        show_table(main_table);
     }
     gameOver1();
 }
 
-void Game::play2() {
-    word();
-    show_table();
+void Game::playVersusPlayer() {
+    resetVariable();
+    show_table(main_table);
     while (unusedPlaces != 0 && (skipper1 || skipper2)) {
-        user1Turn();
-        user2Turn();
+        cout << "\n---------------------First player--------------------\n";
+        skipper1 = userTurn();
+        if(skipper1) pointsUser1 += next(find_words.begin(), find_words.size()-1)->size();
+        cout << "First player's points - " << pointsUser1 << endl;
+        cout << "Second player's points - " << pointsUser2 << endl;
+        show_table(main_table);
+
+        cout << "\n-------------------Second player-------------------\n";
+        skipper2 = userTurn();
+        if(skipper2) pointsUser2 += next(find_words.begin(), find_words.size()-1)->size();
+        cout << "First player's points - " << pointsUser1 << endl;
+        cout << "Second player's points - " << pointsUser2 << endl;
+        show_table(main_table);
     }
     gameOver2();
 }
@@ -251,27 +390,20 @@ void Game::play2() {
 
 bool Game::helper_checkWord(string word){
 
-  //  word = " " + word + " ";
-    int offset;
     string line;
     ifstream Myfile;
-    Myfile.open ("cmake-build-debug\\dict.txt");
+    Myfile.open ("dictionary.txt");
 
     if (Myfile.is_open())
     {
         while (!Myfile.eof())
         {
             getline(Myfile,line);
-            if ((offset = line.find(word, 0)) != string::npos)
+            if ((word.compare(line)) == 0)
             {
-                //cout << "found '" << word << "' in '" << line << "'" << endl;
                 Myfile.close();
                 return true;
             }
-            /*else
-            {
-                cout << " not found '" << word << "' in '" << line << "'" << endl;
-            }*/
         }
         Myfile.close();
     }
@@ -281,21 +413,25 @@ bool Game::helper_checkWord(string word){
     return false;
 }
 
-string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){ // x, y - coord last added
+string Game::computer_turn_recurse(vector<int> unavaibleCells, string word, int x, int y){ // x, y - coord last added
 
     string tmp_word;
     unavaibleCells.push_back(x*10 + y);
     //if(horizontal){
     for(int i = 1; i < 5 - x; i++)
     {
+        if(tmp_table[x + i][y] == '\\'){ //check if next letter
+            break;
+        }
         if(count(unavaibleCells.begin(), unavaibleCells.end(), (x+i)*10 + y)){ //check any next turn
             break;
         }
         tmp_word = word + tmp_table[x + i][y];
+        //cout << tmp_word << endl;
         if(helper_checkWord(tmp_word)){
             return tmp_word;
         }
-        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x + i, y);
+        tmp_word = computer_turn_recurse(unavaibleCells, tmp_word, x + i, y);
         if(tmp_word != "-1"){
             return tmp_word;
         }
@@ -303,16 +439,20 @@ string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){
     }
     for(int i = 1; i <= x; i++)
     {
+        if(tmp_table[x - i][y] == '\\'){ //check if next letter
+            break;
+        }
         if(count(unavaibleCells.begin(), unavaibleCells.end(), (x-i)*10 + y)){ //check any next turn
             break;
         }
         tmp_word = word + tmp_table[x - i][y];
+        //cout << tmp_word << endl;
 
         if(helper_checkWord(tmp_word)){
             return tmp_word;
         }
 
-        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x - i, y);
+        tmp_word = computer_turn_recurse(unavaibleCells, tmp_word, x - i, y);
         if(tmp_word != "-1"){
             return tmp_word;
         }
@@ -322,16 +462,20 @@ string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){
     //else{
     for(int j = 1; j < 5 - y; j++)
     {
+        if(tmp_table[x][y + j] == '\\'){ //check if next letter
+            break;
+        }
         if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y + j)){ //check any next turn
             break;
         }
         tmp_word = word + tmp_table[x][y + j];
+        //cout << tmp_word << endl;
 
         if(helper_checkWord(tmp_word)){
             return tmp_word;
         }
 
-        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x , y + j);
+        tmp_word = computer_turn_recurse(unavaibleCells, tmp_word, x , y + j);
         if(tmp_word != "-1"){
             return tmp_word;
         }
@@ -339,16 +483,20 @@ string Game::tmp_recurse(vector<int> unavaibleCells, string word, int x, int y){
     }
     for(int j = 1; j <= y; j++)
     {
+        if(tmp_table[x][y - j] == '\\'){ //check if next letter
+            break;
+        }
         if(count(unavaibleCells.begin(), unavaibleCells.end(), x*10 + y - j)){ //check any next turn
             break;
         }
         tmp_word = word + tmp_table[x][y - j];
+        //cout << tmp_word << endl;
 
         if(helper_checkWord(tmp_word)){
             return tmp_word;
         }
 
-        tmp_word = tmp_recurse(unavaibleCells, tmp_word, x, y - j);
+        tmp_word = computer_turn_recurse(unavaibleCells, tmp_word, x, y - j);
         if(tmp_word != "-1"){
             return tmp_word;
         }
@@ -373,21 +521,27 @@ string Game::computer_turn()
         {
             if(tmp_table[i][j] == '\\')
             {
-                for(int l = 'a'; l <= 'z'; l++){
-                    //tmp_table = table;
-                    tmp_table[i][j] = 'a';
+                for(int l = 'a'; l <= 'z'; l++)
+                {
+                    if(!checkGoodPlaceForLetter(i, j)) break;
+
+                    copy(&main_table[0][0], &main_table[0][0]+5*5, &tmp_table[0][0]); //tmp_table = main_table;
+                    tmp_table[i][j] = l;
                     for(int k = 0; k < 5; k++)
                     {
                         for (int m = 0; m < 5; m++)
                         {
                             if(tmp_table[k][m] != '\\') {
                                 word = "";
-                                word += tmp_table[k][j];
-                                word = tmp_recurse(unavaibleCells, word, i, j);
-                                cout << "Answer: " + word;
-                                if(word != "-1")
+                                word += tmp_table[k][m];
+                                word = computer_turn_recurse(unavaibleCells, word, k, m);
+                                //cout << "Answer: " + word << endl;
+                                if(word != "-1" && (find_words.find(word) == find_words.end()))
                                 {
-                                    //table = tmp_table
+                                    copy(&tmp_table[0][0], &tmp_table[0][0]+5*5, &main_table[0][0]); //main_table = tmp_table
+                                    unusedPlaces--;
+                                    pointsUser2 += word.size();
+                                    find_words.insert(word);
                                     return word;
                                 }
                             }
@@ -400,57 +554,59 @@ string Game::computer_turn()
     return "-1";
 
 }
-void Game::menu() {
-    cout << "\n 1. Play Royal Baldu with computer" << endl;
-    cout << " 2. Play Royal Baldu with other user" << endl;
-    cout << " 3. Exit\n" << endl;
-    int switcher;
-    cout << "CHOOSE: ";
-    cin >> switcher;
-    switch (switcher) {
-        case 1:
-            play1();
-            break;
-        case 2:
-            play2();
-            break;
-        case 3:
-            cout << "Goodbye -___-" << endl;
-            break;
-        default:
-            cout << "Invalid value" << endl;
-            cout << "CHOOSE: ";
-            cin >> switcher;
-            break;
+bool Game::checkGoodPlaceForLetter(int x, int y){
+    if((x == 0 && y > 0) && (x < 4 && y < 4)){
+        if(tmp_table[x+1][y] == '\\' && tmp_table[x][y+1] == '\\' && tmp_table[x][y-1] == '\\') return false;
     }
-}
-
-bool Game::set_letter(int i) {
-    int x, y;
-    char letter;
-    bool check = true;
-    while (check) {
-        cin >> x >> y;
-        if (x != 5 || y != 5) {
-        if (table[x][y] == '\\') {
-                unusedPlaces--;
-                cout << "Enter a letter: ";
-                cin >> letter;
-                table[x][y] = letter;
-            } else cout << "You cannot put a letter there\n";
-            check = false;
-        }  else {
-            cout << "First player skipped the turn\n";
-            return false;
-        }
-
-
+    if((x > 0 && y > 0) && (x == 4 && y < 4)){
+        if( tmp_table[x-1][y] == '\\' && tmp_table[x][y+1] == '\\' && tmp_table[x][y-1] == '\\') return false;
     }
+    if((x > 0 && y == 0) &&(x < 4 && y < 4)){
+        if(tmp_table[x+1][y] == '\\' && tmp_table[x-1][y] == '\\' && tmp_table[x][y+1] == '\\') return false;
+    }
+    if((x > 0 && y > 0) &&(x < 4 && y == 4)){
+        if(tmp_table[x+1][y] == '\\' && tmp_table[x-1][y] == '\\' && tmp_table[x][y-1] == '\\') return false;
+    }
+    if((x > 0 && y > 0) &&(x == 4 && y == 4)){
+        if(tmp_table[x-1][y] == '\\' && tmp_table[x][y-1] == '\\') return false;
+    }
+    if((x == 0 && y > 0) &&(x < 4 && y == 4)){
+        if(tmp_table[x+1][y] == '\\' && tmp_table[x][y-1] == '\\') return false;
+    }
+    if((x == 0 && y == 0) &&(x < 4 && y < 4)){
+        if(tmp_table[x+1][y] == '\\' && tmp_table[x][y+1] == '\\') return false;
+    }
+    if((x > 0 && y == 0) &&(x == 4 && y < 4)){
+        if(tmp_table[x-1][y] == '\\' && tmp_table[x][y+1] == '\\') return false;
+    }
+    if(tmp_table[x+1][y] == '\\' && tmp_table[x-1][y] == '\\' && tmp_table[x][y+1] == '\\' && tmp_table[x][y-1] == '\\') return false;
     return true;
+};
+
+void Game::menu() {
+    string switcher;
+    while(true){
+        cout << "\n 1. Play Royal Baldu with computer" << endl;
+        cout << " 2. Play Royal Baldu with other user" << endl;
+        cout << " 3. Exit\n" << endl;
+        cout << "CHOOSE: ";
+        cin >> switcher;
+        switcher = toLowerCaseString(switcher);
+        switch (atoi(switcher.c_str())) {
+            case 1:
+                playVersusComputer();
+                break;
+            case 2:
+                playVersusPlayer();
+                break;
+            case 3:
+                cout << "Goodbye -___-" << endl;
+                return;
+            default:
+                cout << "Invalid value" << endl;
+                break;
+        }
+    }
 }
 
 
-int main(){
-    Game gamer;
-    return 0;
-}
