@@ -230,7 +230,6 @@ bool Game::userTurn() {
             if (!equal(answer.begin(), answer.end(), "q")) {
                 if (helper_checkWord(answer)) {
                     if (checker(answer, tmp_table)) {
-                        pointsUser1 += answer.size();
                         cout << "You earned " << answer.size() << endl;
                         copy(&tmp_table[0][0], &tmp_table[0][0]+5*5, &main_table[0][0]);
                         return true;
@@ -342,6 +341,8 @@ void Game::playVersusComputer() {
     while (unusedPlaces != 0 && (skipper1 || skipper2)) {
         cout << "\n---------------------First player--------------------\n";
         skipper1 = userTurn();
+        if(skipper1) pointsUser1 += next(find_words.begin(), find_words.size()-1)->size();
+
         cout << "First player's points - " << pointsUser1 << endl;
         cout << "Second player's points - " << pointsUser2 << endl;
         show_table(main_table);
@@ -355,7 +356,7 @@ void Game::playVersusComputer() {
         t1.join();
 
         skipper2 = equal(computer_word.begin(), computer_word.end(), "-1") ? false : true;
-        equal(computer_word.begin(), computer_word.end(), "-1") ? cout << "Computer skip turn" << endl : cout << "Computer word is " << computer_word << endl;
+        equal(computer_word.begin(), computer_word.end(), "-1") ? cout << "Computer skip turn" << endl : cout << "Computer word is - " << computer_word << endl;
         cout << "First player's points - " << pointsUser1 << endl;
         cout << "Second player's points - " << pointsUser2 << endl;
         show_table(main_table);
@@ -369,12 +370,14 @@ void Game::playVersusPlayer() {
     while (unusedPlaces != 0 && (skipper1 || skipper2)) {
         cout << "\n---------------------First player--------------------\n";
         skipper1 = userTurn();
+        if(skipper1) pointsUser1 += next(find_words.begin(), find_words.size()-1)->size();
         cout << "First player's points - " << pointsUser1 << endl;
         cout << "Second player's points - " << pointsUser2 << endl;
         show_table(main_table);
 
         cout << "\n-------------------Second player-------------------\n";
         skipper2 = userTurn();
+        if(skipper2) pointsUser2 += next(find_words.begin(), find_words.size()-1)->size();
         cout << "First player's points - " << pointsUser1 << endl;
         cout << "Second player's points - " << pointsUser2 << endl;
         show_table(main_table);
@@ -523,7 +526,7 @@ string Game::computer_turn()
                     if(!checkGoodPlaceForLetter(i, j)) break;
 
                     copy(&main_table[0][0], &main_table[0][0]+5*5, &tmp_table[0][0]); //tmp_table = main_table;
-                    tmp_table[i][j] = 'a';
+                    tmp_table[i][j] = l;
                     for(int k = 0; k < 5; k++)
                     {
                         for (int m = 0; m < 5; m++)
